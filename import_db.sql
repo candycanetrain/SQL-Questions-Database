@@ -70,3 +70,10 @@ VALUES
   (2, null, 2, 'At my house!'),
   (1, 1, 2, 'I tried that already'),
   (1, 3, 3, 'I have the same problem');
+
+  INSERT INTO
+    question_follows (question_id, follower_id)
+  VALUES
+    (1,1),
+    (1,3),
+    (2,2);

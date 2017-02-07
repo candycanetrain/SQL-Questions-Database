@@ -40,19 +40,6 @@ class User
     user.empty? ? nil : User.new(user.first)
   end
 
-  # def self.find_by_question_id(question_id)
-  #   user = QuestionsDatabase.instance.execute(<<-SQL, question_id)
-  #     SELECT
-  #       user_id
-  #     FROM
-  #       questions
-  #     WHERE
-  #       id = ?
-  #   SQL
-  #   user.empty? ? nil : User.find_by_id(user.first)
-  # end
-
-
   def initialize(options)
     @id = options['id']
     @fname = options['fname']
@@ -67,6 +54,11 @@ class User
   def authored_replies
     Reply.find_by_user_id(@id)
   end
+
+  def followed_questions
+    QuestionFollow.followed_questions_for_user_id(@id)
+  end
+
 end
 
 class Question
@@ -112,7 +104,10 @@ class Question
   def replies
     Reply.find_by_question_id(@id)
   end
+  def followers
+    QuestionFollow.followers_for_question_id(@id)
 
+  end
 
 end
 
@@ -187,3 +182,37 @@ class Reply
   end
 
 end
+
+class QuestionFollow
+
+  def self.followers_for_question_id(question_id)
+    followers = QuestionsDatabase.instance.execute(<<-SQL, question_id)
+      SELECT
+        users.*
+      FROM users
+      JOIN question_follows ON users.id = question_follows.follower_id
+      WHERE question_follows.question_id = ?
+    SQL
+
+    followers.map {|follower| User.new(follower)}
+  end
+
+  def self.followed_questions_for_user_id(user_id)
+    questions = QuestionsDatabase.instance.execute(<<-SQL, user_id)
+      SELECT questions.*
+      FROM questions
+      JOIN question_follows ON questions.id = question_follows.question_id
+      WHERE question_follows.follower_id = ?
+    SQL
+
+    questions.map {|question| Question.new(question)}
+
+  end
+end
+
+candra = User.find_by_id(2)
+fena = User.find_by_id(1)
+question_c = Question.find_by_author_id(2).first
+question_f = Question.find_by_author_id(1).first
+main_reply = Reply.find_by_id(1)
+child_reply = Reply.find_by_id(3)
