@@ -41,8 +41,8 @@ CREATE TABLE replies (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-DROP TABLE IF EXISTS questions_like;
-CREATE TABLE questions_like (
+DROP TABLE IF EXISTS question_likes;
+CREATE TABLE question_likes (
   question_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
 
@@ -71,9 +71,17 @@ VALUES
   (1, 1, 2, 'I tried that already'),
   (1, 3, 3, 'I have the same problem');
 
-  INSERT INTO
-    question_follows (question_id, follower_id)
-  VALUES
-    (1,1),
-    (1,3),
-    (2,2);
+INSERT INTO
+  question_follows (question_id, follower_id)
+VALUES
+  (1,1),
+  (1,3),
+  (2,2);
+
+INSERT INTO
+  question_likes (question_id, user_id)
+VALUES
+  (2,2),
+  (2,1),
+  (2,3),
+  (1,3);
