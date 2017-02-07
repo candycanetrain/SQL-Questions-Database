@@ -30,15 +30,15 @@ CREATE TABLE question_follows (
 
 DROP TABLE IF EXISTS replies;
 CREATE TABLE replies (
-  id INTEGER NOT NULL,
+  id INTEGER PRIMARY KEY,
   question_id INTEGER NOT NULL,
   parent_id INTEGER,
-  author_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
   body TEXT,
 
   FOREIGN KEY (question_id) REFERENCES questions(id),
   FOREIGN KEY (parent_id) REFERENCES replies(id),
-  FOREIGN KEY (author_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 DROP TABLE IF EXISTS questions_like;
@@ -62,3 +62,11 @@ INSERT INTO
 VALUES
   ('Fixing sql', 'My computer is not working', (SELECT id FROM users WHERE fname = 'Candra')),
   ('Party', 'Where is the party??', (SELECT id FROM users WHERE fname = 'Fernanda'));
+
+INSERT INTO
+  replies (question_id, parent_id, user_id, body)
+VALUES
+  (1, null, 1, 'Try restarting.'),
+  (2, null, 2, 'At my house!'),
+  (1, 1, 2, 'I tried that already'),
+  (1, 3, 3, 'I have the same problem');
