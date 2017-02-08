@@ -60,6 +60,18 @@ class User
   end
   def liked_questions
     QuestionLike.liked_questions_for_user_id(@id)
+  end
+  def average_karma
+    QuestionsDatabase.instance.execute(<<-SQL, @id)
+      SELECT
+        count(question_likes.user_id) / CAST (( count ( DISTINCT questions.id)) AS FLOAT) AS karma
+      FROM
+        questions
+      LEFT OUTER JOIN
+        question_likes ON questions.id = question_likes.question_id
+      WHERE
+        questions.author_id = ?
+    SQL
 
   end
 
@@ -96,6 +108,9 @@ class Question
 
   def self.most_followed(n)
     QuestionFollow.most_followed_questions(n)
+  end
+  def self.most_liked(n)
+    QuestionLike.most_liked_questions(n)
   end
 
   def initialize(options)
@@ -225,7 +240,7 @@ class QuestionFollow
   def self.most_followed_questions(n)
     questions = QuestionsDatabase.instance.execute(<<-SQL, n)
       SELECT
-        questions.*, popular_questions.count
+        questions.*
       FROM
         questions
       JOIN(
@@ -288,6 +303,27 @@ class QuestionLike
     SQL
 
     liked_questions.map{ |question| Question.new(question)}
+  end
+  def self.most_liked_questions(n)
+    most_liked = QuestionsDatabase.instance.execute(<<-SQL, n)
+      SELECT
+        questions.*
+      FROM
+        questions
+      JOIN (
+        SELECT
+          questions_id, COUNT(user_id) as count
+        FROM
+          question_likes
+        GROUP BY
+          questions_id
+        ORDER BY
+          count DESC
+      ) AS liked_questions ON liked_questions.questions_id = questions.id
+      LIMIT ?
+    SQL
+
+    most_liked.map { |question| Question.new(question)}
   end
 end
 

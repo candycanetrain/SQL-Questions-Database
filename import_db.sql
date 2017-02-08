@@ -61,7 +61,8 @@ INSERT INTO
   questions (title, body, author_id)
 VALUES
   ('Fixing sql', 'My computer is not working', (SELECT id FROM users WHERE fname = 'Candra')),
-  ('Party', 'Where is the party??', (SELECT id FROM users WHERE fname = 'Fernanda'));
+  ('Party', 'Where is the party??', (SELECT id FROM users WHERE fname = 'Fernanda')),
+  ('Unpopular', 'Why does nobody like me?', (SELECT id FROM users WHERE fname = 'John'));
 
 INSERT INTO
   replies (question_id, parent_id, user_id, body)
