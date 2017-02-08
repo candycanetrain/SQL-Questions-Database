@@ -1,3 +1,4 @@
+require 'model_base'
 require 'sqlite3'
 require 'singleton'
 
@@ -46,6 +47,30 @@ class User
     @lname = options['lname']
   end
 
+  def save
+    if @id.nil?
+      #save it
+      QuestionsDatabase.instance.execute(<<-SQL, @fname, @lname)
+        INSERT INTO
+          users (fname, lname)
+        VALUES
+          (?, ?)
+      SQL
+      @id = QuestionsDatabase.instance.last_insert_row_id
+    else
+      #update it
+      QuestionsDatabase.instance.execute(<<-SQL, @fname, @lname, @id)
+        UPDATE
+          users
+        SET
+          fname = ?, lname = ?
+        WHERE
+          id = ?
+      SQL
+    end
+
+
+  end
 
   def authored_questions
     Question.find_by_author_id(@id)
@@ -120,6 +145,30 @@ class Question
     @author_id = options['author_id']
   end
 
+  def save
+    if @id.nil?
+      #save
+      QuestionsDatabase.instance.execute(<<-SQL, @title, @body, @author_id)
+        INSERT INTO
+          questions (title, body, author_id)
+        VALUES
+          (?, ?, ?)
+      SQL
+      @id = QuestionsDatabase.instance.last_insert_row_id
+    else
+      #update
+      QuestionsDatabase.instance.execute(<<-SQL, @title, @body, @author_id, @id)
+        UPDATE
+          questions
+        SET
+          title = ?, body = ?, author_id = ?
+        WHERE
+          id = ?
+      SQL
+
+    end
+
+  end
   def author
     User.find_by_id(@author_id)
   end
@@ -182,6 +231,27 @@ class Reply
     @parent_id = options['parent_id']
     @user_id = options['user_id']
     @body = options['body']
+  end
+
+  def save
+    if @id.nil?
+      QuestionsDatabase.instance.execute(<<-SQL, @question_id, @parent_id, @user_id, @body)
+        INSERT INTO
+          replies (question_id, parent_id, user_id, body)
+        VALUES
+          (?, ?, ?, ?)
+      SQL
+        @id = QuestionsDatabase.instance.last_insert_row_id
+    else
+      QuestionsDatabase.instance.execute(<<-SQL, @question_id, @parent_id, @user_id, @body, @id)
+      UPDATE
+       replies
+      SET
+        question_id = ?, parent_id = ?, user_id = ?, body = ?
+      WHERE
+        @id = ?
+      SQL
+    end
   end
 
   def author
